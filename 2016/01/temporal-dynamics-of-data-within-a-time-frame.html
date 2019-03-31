@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- ## for client-side less
+  <link rel="stylesheet/less" type="text/css" href="https://geweiwang.github.io/theme/css/style.less">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/less.js/1.7.3/less.min.js" type="text/javascript"></script>
+  -->
+
+  <link href="https://geweiwang.github.io/favicon.ico?v=2" rel="icon">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/style.min.css">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/pygments.css">
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Inconsolata">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/hatena-bookmark-icon.css">
+
+  <script>
+  function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 50 + 'px';
+  }
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Gewei Wang">
+  <meta name="description" content="Posts and writings by Gewei Wang">
+
+  <link href="https://geweiwang.github.io/atom.xml" type="application/atom+xml" rel="alternate" title="Gewei's Blog Atom" />
+
+<meta name="keywords" content="Python, Survival analysis, Time sense">
+
+  <title>
+    Gewei's Blog
+&ndash; Temporal Dynamics of Data within a Time Frame  </title>
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-71693744-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
+
+<body>
+  <main>
+    <header>
+      <div class="site_name">
+        <a href="https://geweiwang.github.io">Gewei's Blog</a>&emsp;
+        <a href="https://geweiwang.github.io/archives.html">Archive</a>&emsp;
+        <!-- <a href="https://geweiwang.github.io/2015/12/about-me.html">Me</a>&emsp; -->
+        <a href="https://github.com/GeweiWang" target="_blank"><i class="fa fa-github-alt"></i> </a>&emsp;
+        <a href="https://geweiwang.github.io/atom.xml" target="_blank" title="Feed">
+          <i class="fa fa-rss"></i>
+        </a>&ensp;
+      </div>
+
+    </header>
+
+<article>
+  <div class="article_title">
+    <h1><a href="https://geweiwang.github.io/2016/01/temporal-dynamics-of-data-within-a-time-frame.html">Temporal Dynamics of Data within a Time Frame</a></h1>
+  </div>
+  <div class="article_meta">
+    <p class="article_meta_post_date">Sun, 10 Jan 2016</p>
+ Tags:
+      <a href="https://geweiwang.github.io/tag/python.html"> #Python</a>,      <a href="https://geweiwang.github.io/tag/survival-analysis.html"> #Survival analysis</a>,      <a href="https://geweiwang.github.io/tag/time-sense.html"> #Time sense</a>    </p>
+  </div>
+  <div class="article_text">
+    <p><br></p>
+<h3>Introduction</h3>
+<p>Business never stands still, and neither does business data. Every data set is just a snapshot of a business. Each feature in data has a time frame before a snapshot date. Even within a time frame, some data still has temporal dynamics. We'll detail this point using three examples. The first is about historical prices of stock market; the third introduces a paper which shows a subtle temporal nature in beer reviews. The two are described briefly. The second is about the effect of cutoff dates on the target feature in survival analysis.</p>
+<p><br><br></p>
+<h3>Adjusted closing prices of stocks</h3>
+<p>Historical data can change. For example, if we download Apple stock historical data at different time, we might get different <a href="http://www.investopedia.com/terms/a/adjusted_closing_price.asp">adjusted closing prices</a> even during the same time periods because of prices adjustment for dividends and splits. </p>
+<p><br><br></p>
+<h3>The effect of cutoff dates on right-cencoring in Kaplan-Meier estimation</h3>
+<p>Survival analysis estimates how long until a particular event happens. In business a typcial use case is service subscribers' tenure analysis. Here are a few key concepts of survival analysis.</p>
+<p><strong>Tenure</strong> is censored data, which means the information about tenure is partially known.</p>
+<p><strong>Hazard probabilities</strong> measure the probability that an event succumbs to a risk at a given time <em>t</em>. The hazard probability at tenure <em>t</em> is the ratio between two numbers:</p>
+<ul>
+<li>Population that succumbed to the risk <span class="math">\(d_j\)</span>: The number of customers who stopped at exactly tenure <span class="math">\(t_j\)</span>.</li>
+<li>Population at risk <span class="math">\(n_j\)</span>: The number of customers whose tenure is greater than or equal to <span class="math">\(t_j\)</span>.</li>
+</ul>
+<p><strong>Survival</strong> is the probability that an event has not succumbed to the risk up to a given time <em>t</em>. In other words, survival accumulates information about the inverse of hazards. The survival at tenure <em>t</em> is the product of one minus the hazards for all tenures less than <em>t</em>.</p>
+<p><strong><a href="https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator">Kaplan–Meier estimation</a></strong>(aka, KM method, or product-limit estimator) is one of survivial analysis methods. In 1958 Kaplan and Meier showed that it was, in fact, the nonparametric maximum likelihood estimator. This gave the method a solid theoretical justification. The KM estimation defines survival as</p>
+<div class="math">$$\hat{S}(t) = \prod_{j:t_j\leq t}\left(1-\frac{d_j}{n_j}\right)$$</div>
+<p><br><br>
+Let's look at an example. <code>idata</code> is a sample data of service subscribers.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+
+<span class="c1"># Snippets of subscribers data.</span>
+<span class="c1"># Null stop_date means the user is right-censored</span>
+<span class="c1"># censored : 1 - censored; 0 - uncensored</span>
+<span class="n">idata</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">user_id     market      channel      start_date    stop_date    censored</span>
+<span class="sd">2488577    Market-B    Channel-C3    2008-06-28                    1</span>
+<span class="sd">2584066    Market-A    Channel-C3    2008-06-28                    1</span>
+<span class="sd">2574285    Market-A    Channel-C1    2008-11-28                    1</span>
+<span class="sd">2201921    Market-B    Channel-C3    2008-09-18                    1</span>
+<span class="sd">2776956    Market-A    Channel-C2    2008-09-28                    1</span>
+<span class="sd">1891311    Market-B    Channel-C3    2008-09-28                    1</span>
+<span class="sd">1995282    Market-B    Channel-C1    2008-05-28    2008-10-28      0</span>
+<span class="sd">2171689    Market-A    Channel-C1    2008-09-02    2008-11-02      0</span>
+<span class="sd">1597753    Market-A    Channel-C1    2008-10-01    2008-12-21      0</span>
+<span class="sd">1987770    Market-B    Channel-C2    2008-10-08    2008-12-28      0</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start_date&#39;</span><span class="p">,</span> <span class="s1">&#39;stop_date&#39;</span><span class="p">])</span>
+</pre></div>
+
+
+<p><br>
+This is <strong>right-censored</strong> data, which means for currently active users we know when they started, but not when they will stop. Suppose the <strong>snapshot date</strong> of the data is <code>2008-12-28</code>. The tenures can be calculated by three variables: <code>start_date</code>, <code>stop_date</code>, and <code>censored</code>.</p>
+<p>All the features in the data come from a time frame before a <strong>cutoff date</strong>. If the cutoff equals to the snapshot date, we can use the data to <strong>profile</strong> customers during the time frame. Let's use code plotting to illustrate the data.</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_right_censor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">snapshot_date</span><span class="p">,</span> <span class="n">cutoff_date</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">censored</span><span class="o">=</span><span class="s1">&#39;censored&#39;</span><span class="p">,</span>
+                     <span class="n">start</span><span class="o">=</span><span class="s1">&#39;start_date&#39;</span><span class="p">,</span>
+                     <span class="n">stop</span><span class="o">=</span><span class="s1">&#39;stop_date&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot to illustrate the effect of cutoff on right-censoring.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    snapshot_date : str, format: &#39;yyyy-mm-dd&#39;</span>
+<span class="sd">        The date when a snapshot of the data was taken.        </span>
+
+<span class="sd">    cutoff_date : str, default None, format: &#39;yyyy-mm-dd&#39;</span>
+<span class="sd">        Define the end of the time frame.</span>
+<span class="sd">        The default cutoff_date equals to snapshot_date.</span>
+<span class="sd">        cutoff_date should be earlier than snapshot_date.        </span>
+
+<span class="sd">    censored, start, stop : str</span>
+<span class="sd">        The names of columns in DataFrame for censored, </span>
+<span class="sd">        start_date, and stop_date.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># code @ https://github.com/geweiwang</span>
+</pre></div>
+
+
+<p>Here is an illustration of the data and its survival curve. We see the default cutoff date equals to the snapshot date.</p>
+<div class="highlight"><pre><span></span><span class="n">snapshot_date</span> <span class="o">=</span> <span class="s1">&#39;2008-12-28&#39;</span>
+<span class="n">plot_right_censor</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">snapshot_date</span><span class="p">)</span>
+</pre></div>
+
+
+<p>| 
+--- | ---
+<img alt src="/res/right_censor_1.png"> | <img alt src="/res/survival_curve_1.png"></p>
+<p><br><br><br>
+If we set the cutoff date at <code>2008-12-18</code>, the data and its survival curve change. Two previous uncensored customers become censored.</p>
+<div class="highlight"><pre><span></span><span class="n">cutoff_date</span> <span class="o">=</span> <span class="s1">&#39;2008-12-18&#39;</span>
+<span class="n">plot_right_censor</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">snapshot_date</span><span class="p">,</span> <span class="n">cutoff_date</span><span class="p">)</span>
+</pre></div>
+
+
+<p>| 
+--- | ---
+<img alt src="/res/right_censor_2.png"> | <img alt src="/res/survival_curve_2.png"></p>
+<p><br><br><br>
+If we move the cutoff date further to <code>2008-11-18</code>, the data and its survival curve change again. The data of a customer who started the service after the cutoff has been excluded from the KM estimation.</p>
+<div class="highlight"><pre><span></span><span class="n">cutoff_date</span> <span class="o">=</span> <span class="s1">&#39;2008-11-18&#39;</span>
+<span class="n">plot_right_censor</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">snapshot_date</span><span class="p">,</span> <span class="n">cutoff_date</span><span class="p">)</span>
+</pre></div>
+
+
+<p>| 
+--- | ---
+<img alt src="/res/right_censor_3.png"> | <img alt src="/res/survival_curve_3.png"></p>
+<p><br>
+The changes of numbers of customers are summerized in a table.</p>
+<div class="highlight"><pre><span></span>Cutoff      | Censored | Uncensored |  Total
+------------+----------+------------+--------
+2008-12-28  |    6     |     4      |   10
+2008-12-18  |    8     |     2      |   10
+2008-11-18  |    7     |     2      |    9
+</pre></div>
+
+
+<p><br>
+We can see the changes of the censored data over the different cutoff dates:</p>
+<ul>
+<li>Some customers come to active again.</li>
+<li>Some customers are excluded from the KM estimation.</li>
+<li>The original profiling data might be used for prediction modeling because the target information comes from a time frame after the new earlier cutoff date.</li>
+</ul>
+<p><br>
+Next we'll see another example about customers behavior changing with time, but in a little more subtle way.</p>
+<p><br><br></p>
+<h3>Customers' beer reviews change with their experience</h3>
+<p>Customer reviews are traditionally used for sentiment analysis that treats each customer's review history as a series of unordered event. However, when we have big enough data like Amazon customer reviews or RateBeer beer reviews, we have many customers who review multiple times. These customers' tastes may change <strong>over time</strong>, so do their reviews.</p>
+<p>The paper <a href="http://i.stanford.edu/~julian/pdfs/www13.pdf" target="_blank"><em>Modeling the Evolution of User Expertise through Online Reviews</em></a> by Julian McAuley and Jure Leskovec from Stanford digs deep into this kind of data and gets interesting insights on recommending products to customers. They encode temporal information into models via the proxy of user experience. </p>
+<p>They demonstrate the evolution of user tastes by analyzing millions of beer reviews. And they find over time some customers grow from 'beer novices' to 'beer experts' and acquire a common taste: hops. Beginners give higher ratings to almost all lagers (less hoppy), while experts give higher ratings to almost all strong ales (more hoppy); thus they conclude that strong ales might be an ‘acquired taste’.  </p>
+<p>Let's sneak a peak at <a href="http://snap.stanford.edu/data/finefoods.txt.gz">Amazon customers's beer reviews</a></p>
+<ul>
+<li>Subset beer-related reviews</li>
+<li>Remove duplicate records</li>
+<li>Filter the data by the number of reviews greater than five</li>
+<li>Stop the default word 'beer', and put the results to an image using <a href="https://github.com/amueller/word_cloud">word_cloud</a></li>
+</ul>
+<p><img alt src="/res/hop.png"></p>
+<p>We can see customers with multiple beer reviews talk a lot about 'ale' and 'hop' -- a possible sign of customers having acquired this 'expert' taste over time.</p>
+<p><br></p>
+<hr>
+<p><br></p>
+<h3>Summary</h3>
+<p>Through the three examples, we see even during a time frame the data is not static but dynamic.</p>
+<ul>
+<li>Situation changes, so is historical data adjusted to stay aligned with current situation. Adjusted closing prices of stocks are the case.</li>
+<li>For Kaplan-Meier estimation, the censored data changes with cutoff dates moving backward.</li>
+<li>Along customer review timeline there might be latent signals of changing tastes. Recommender systems can extract this temporal feature and model customer evolution for better performance.</li>
+</ul>
+<p>Data is almost always dynamic -- some obvious, some subtle. Making good use of the temporal nature of data might give us interesting insights.</p>
+<p><br>
+Thanks for reading!</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+  </div>
+
+
+
+  <div id="article_comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_identifier = "2016/01/temporal-dynamics-of-data-within-a-time-frame.html";
+        (function() {
+             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+             dsq.src = '//gewei.disqus.com/embed.js';
+             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+         })();
+    </script>
+  </div>
+
+</article>
+
+
+  </main>
+
+
+
+</body>
+</html>

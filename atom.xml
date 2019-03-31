@@ -1,0 +1,805 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Gewei's Blog</title><link href="https://geweiwang.github.io/" rel="alternate"></link><link href="https://geweiwang.github.io/atom.xml" rel="self"></link><id>https://geweiwang.github.io/</id><updated>2017-05-24T00:00:00-04:00</updated><entry><title>Beijing Property Market</title><link href="https://geweiwang.github.io/2017/05/beijing-property-market.html" rel="alternate"></link><published>2017-05-24T00:00:00-04:00</published><updated>2017-05-24T00:00:00-04:00</updated><author><name>Gewei Wang</name></author><id>tag:geweiwang.github.io,2017-05-24:/2017/05/beijing-property-market.html</id><summary type="html">&lt;p&gt;Beijing home prices on a map&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Introduction&lt;/h3&gt;
+&lt;p&gt;This is a choropleth map of Beijing home prices.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;iframe src="/res/Beijing_property_market_slider.html" height="900" width="100%" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;em&gt;About the data&lt;br&gt;
+The data of 2017 is scraped from web.&lt;br&gt;
+The data of 2016 and 2018 is fake.&lt;/em&gt;&lt;/p&gt;</content><category term="Visualization"></category><category term="Bokeh"></category><category term="Python"></category></entry><entry><title>DataThon!</title><link href="https://geweiwang.github.io/2016/12/datathon.html" rel="alternate"></link><published>2016-12-03T00:00:00-05:00</published><updated>2016-12-03T00:00:00-05:00</updated><author><name>Gewei Wang</name></author><id>tag:geweiwang.github.io,2016-12-03:/2016/12/datathon.html</id><summary type="html">&lt;p&gt;Data for Good teaming up with Raising the Roof held a DataThon on Saturday in Toronto. I was glad to take part in it. It was 12-hour data crunching on about 20 data sets. In this post, we'll deal with one of them -- a donation Excel file. We're going to explore and clean it, create a new feature, and finally do donation frequency analysis. &lt;br&gt;&lt;br&gt; &lt;img alt="datathon picture" src="/res/datathon_pic_post.jpg"&gt; &lt;em&gt;&lt;center&gt;&lt;font size=1&gt;source: Data for Good&lt;/font&gt;&lt;/center&gt;&lt;/em&gt;&lt;/p&gt;</summary><content type="html">&lt;iframe src="/res/dataThon.html" height="12000" width="100%" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;</content><category term="Python"></category><category term="Data For Good"></category></entry><entry><title>KM Estimation Using SAS and Python in Jupyter Notebook</title><link href="https://geweiwang.github.io/2016/11/km-estimation-using-sas-and-python-in-jupyter-notebook.html" rel="alternate"></link><published>2016-11-21T00:00:00-05:00</published><updated>2016-11-21T00:00:00-05:00</updated><author><name>Gewei Wang</name></author><id>tag:geweiwang.github.io,2016-11-21:/2016/11/km-estimation-using-sas-and-python-in-jupyter-notebook.html</id><summary type="html">&lt;p&gt;SAS has taken another step to embrace open source by bringing SAS and Jupyter Notebook together. SAS coding in Jupyter Notebook is available in April for SAS Linux, and in July for SAS University Edition. I'll use Jupyter notebooks to compare the output of Kaplan-Meier (KM) survival estimatation using SAS and Python. &lt;br&gt;&lt;br&gt; &lt;img alt="kms_4_summary" src="/res/kms_4_summary.png"&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Introduction&lt;/h3&gt;
+&lt;p&gt;SAS has taken another step to embrace open source by bringing &lt;a href="http://blogs.sas.com/content/sasdummy/2016/04/24/how-to-run-sas-programs-in-jupyter-notebook/" target="_blank"&gt;SAS and Jupyter Notebook&lt;/a&gt; together. SAS coding in Jupyter Notebook is available in April for SAS Linux, and in July for SAS University Edition. I'll use Jupyter notebooks to compare the output of Kaplan-Meier (KM) survival estimatation using SAS and Python.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h4&gt;Background&lt;/h4&gt;
+&lt;p&gt;SAS KM estimation is in &lt;code&gt;PROC LIFETEST&lt;/code&gt;. We'll see it soon in the SAS notebook.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/GeweiWang/kmsurvival"&gt;&lt;code&gt;KMSurvial&lt;/code&gt;&lt;/a&gt; is an implementation of KM estimation in Python. It's a practical program for comparing survial probabilities qualitatively among groups. And it's also small, fast, and easy to use.&lt;/p&gt;
+&lt;p&gt;The reason for writing a new KM estimator is that some features I want are not available or flexible in other implementations as of early 2016. These features include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Differentiate between the snapshot date and cutoff dates of a data set.&lt;/li&gt;
+&lt;li&gt;Support hierarchical strata.&lt;/li&gt;
+&lt;li&gt;Flexible combination of groups for comparisions.&lt;/li&gt;
+&lt;li&gt;Support multiple data input formats.&lt;/li&gt;
+&lt;li&gt;Users can easily get hazards and survival functions which can be piped into visualziaiton or further data processing.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;
+We're going to first check quantative results of &lt;code&gt;KMSurvival&lt;/code&gt; against SAS's -- a process of data loading, exploring, cleaning, and reshaping. Then we'll compare both qualitatively. &lt;/p&gt;
+&lt;p&gt;The rest of the post is written in Jupyter Notebook. There are two parts: one uses SAS; another Python.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;iframe src="/res/sas_in_jupyter_for_post.html" height="4100" width="100%" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;
+&lt;br&gt;
+&lt;iframe src="/res/KMSurvival_for_post.html" frameborder="0" scrolling="no" width="100%" onload="resizeIframe(this)" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;em&gt;The original notebooks are here: &lt;a href="https://nbviewer.jupyter.org/github/GeweiWang/notebooks/blob/master/sas_in_jupyter_for_post.ipynb" target="_blank"&gt;one in SAS&lt;/a&gt;; &lt;a href="https://nbviewer.jupyter.org/github/GeweiWang/notebooks/blob/master/KMSurvival_for_post.ipynb" target="_blank"&gt;another in Python&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;</content><category term="SAS"></category><category term="Python"></category><category term="Survival Analysis"></category></entry><entry><title>A Case Study of TDD in Data Analysis</title><link href="https://geweiwang.github.io/2016/09/a-case-study-of-tdd-in-data-analysis.html" rel="alternate"></link><published>2016-09-03T00:00:00-04:00</published><updated>2016-09-03T00:00:00-04:00</updated><author><name>Gewei Wang</name></author><id>tag:geweiwang.github.io,2016-09-03:/2016/09/a-case-study-of-tdd-in-data-analysis.html</id><summary type="html">&lt;p&gt;Test-driven development (TDD) uses agile and lean approaches and test-first practice instead of testing near the end of a development cycle. In this post we will use a simplified example of association rules in retail industry to illustrate TDD in data analysis. &lt;br&gt;&lt;br&gt; &lt;img alt="explain cte" src="/res/explain_cte_baskets.png"&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Introduction&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Test-driven_development" target="_blank"&gt;Test-driven development (TDD)&lt;/a&gt; uses agile and lean approaches and test-first practice instead of testing near the end of a development cycle. In this post we will use a simplified example of association rules in retail industry to illustrate TDD in data analysis.&lt;/p&gt;
+&lt;p&gt;The common metrics for association rules are support, confidence and lift, however, we'll see sometimes these are not enough to ensure rules extracted are correct. Before diving into details, let's give our test-driven data analysis a brief definition:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Short analysis cycle. Begining with simple cases, we'll generate one-way association rules.&lt;/li&gt;
+&lt;li&gt;Use so simple but real data that we can extract rules quickly and check them easily.&lt;/li&gt;
+&lt;li&gt;Write a failing test to check the rules.&lt;/li&gt;
+&lt;li&gt;Refactor the original code to make the failing test pass.&lt;/li&gt;
+&lt;li&gt;[&lt;em&gt;Next iteration&lt;/em&gt;]&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Generate one-way rules on clean data&lt;/h3&gt;
+&lt;p&gt;Association rules is unsupervised learning techniques which try to find useful patterns in transaction data. The simplest rules are one-way rules, for example, customers buy product A are likely to buy product B at the same time.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+Suppose we have a receipt from a grocery store called &lt;strong&gt;Neat&lt;/strong&gt;, and we'll derive one-way associaton rules for the store using SQL. Let's take a look at the data. The entity-relationship (ER) diagram of Neat data is also given.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;A receipt of store Neat&lt;br&gt;&lt;br&gt;&lt;/th&gt;
+&lt;th&gt;The entity-relationship diagram of Neat data&lt;br&gt;&lt;br&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;img alt src="/res/receipt_neat.png"&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img alt src="/res/ER_neat.png"&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h4&gt;Insert the Neat data on the receipt into database&lt;/h4&gt;
+&lt;p&gt;&lt;font size=2&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;products_neat&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                   &lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;orders_neat&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      &lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;order_items_neat&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;product_id | name             | category       order_id | order_date           order_item_id | order_id | product_id | quantity
+-----------+------------------+----------      ---------+-----------           --------------+----------+------------+---------
+6148301460 | CARROTS 3LB      | PRODUCE        100      | 2016-01-01             1           | 100      | 6148301460 |  1
+4053       | LEMON            | PRODUCE                                          2           | 100      | 4053       |  2
+4065       | PEPPER GREEN SWT | PRODUCE                                          3           | 100      | 4065       |  1
+2193860    | CHICKEN LEG BA   | MEATS                                            4           | 100      | 2193860    |  1
+6340002536 | WOND BREAD WW    | BAKERY                                           5           | 100      | 6340002536 |  1
+6340011169 | WHL WHT FIBR BRD | BAKERY                                           6           | 100      | 6340011169 |  1
+5719732951 | ROOSTER TOFU     | DELI                                             7           | 100      | 5719732951 |  3
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;/font&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h4&gt;One-way association rules for Neat&lt;/h4&gt;
+&lt;p&gt;Because of the data schemas of Neat, the three SQL commands give us the same results but use different execution time.
+&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;only &lt;code&gt;SELECT&lt;/code&gt;&lt;/th&gt;
+&lt;th&gt;using &lt;code&gt;GROUP BY&lt;/code&gt;&lt;/th&gt;
+&lt;th&gt;using &lt;code&gt;DISTINCT&lt;/code&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;SELECT order_id, product_id FROM order_items_neat;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;SELECT order_id, product_id FROM order_items_neat GROUP BY order_id, product_id;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;SELECT DISTINCT order_id, product_id FROM order_items_neat;&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;img alt src="/res/explain_analyze.png"&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img alt src="/res/explain_analyze_groupby.png"&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img alt src="/res/explain_analyze_distinct.png"&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;
+&lt;strong&gt;The three commands give the same result&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;font size=2&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;order_id | product_id
+---------+-----------
+ 100     | 6148301460
+ 100     | 4053
+ 100     | 4065
+ 100     | 2193860
+ 100     | 6340002536
+ 100     | 6340011169
+ 100     | 5719732951
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;/font&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+We see the SQL with only &lt;code&gt;SELECT&lt;/code&gt; is faster than the one using &lt;code&gt;GROUP BY&lt;/code&gt;, which is faster than the one using &lt;code&gt;DISTINCE&lt;/code&gt;. The data used here is just one transaction. When we have millions of tranaction records, the difference could be even more pronounced. So we decide to use the SQL without GROUP BY or DISTINCT in the common table expression (CTE) &lt;code&gt;baskets&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cm"&gt;/*&lt;/span&gt;
+&lt;span class="cm"&gt;Extract one-way association rules for stores Neat and Messy.&lt;/span&gt;
+&lt;span class="cm"&gt;Compare the differences between no GROUP BY and using GROUP BY in CTE baskets&lt;/span&gt;
+&lt;span class="cm"&gt;Only change the CTE baskets for different scenarios.&lt;/span&gt;
+&lt;span class="cm"&gt;The CTE rules and the main SELECT clause are common parts.&lt;/span&gt;
+&lt;span class="cm"&gt;*/&lt;/span&gt;
+
+&lt;span class="k"&gt;WITH&lt;/span&gt; &lt;span class="n"&gt;baskets&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="c1"&gt;-- baskets of store Neat&lt;/span&gt;
+    &lt;span class="c1"&gt;-- without GROUP BY or DISTINCT&lt;/span&gt;
+    &lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;order_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="k"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+           &lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;OVER&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;PARTITION&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;cnt&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+           &lt;span class="n"&gt;tot_order&lt;/span&gt;
+    &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;order_items_neat&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;
+        &lt;span class="k"&gt;INNER&lt;/span&gt; &lt;span class="k"&gt;JOIN&lt;/span&gt; &lt;span class="n"&gt;products_neat&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="k"&gt;ON&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;
+        &lt;span class="k"&gt;CROSS&lt;/span&gt; &lt;span class="k"&gt;JOIN&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;COUNT&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;DISTINCT&lt;/span&gt; &lt;span class="n"&gt;order_id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;tot_order&lt;/span&gt; &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;order_items_neat&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;
+&lt;span class="p"&gt;),&lt;/span&gt;
+
+&lt;span class="c1"&gt;-- The code below is common for different baskets&lt;/span&gt;
+&lt;span class="n"&gt;rules&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="c1"&gt;-- ls: left sides of association rules&lt;/span&gt;
+    &lt;span class="c1"&gt;-- rs: right sides of association rules&lt;/span&gt;
+    &lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;ls&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;ls_pid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;rs&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;rs_pid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+           &lt;span class="n"&gt;ls&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="k"&gt;name&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;ls_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;rs&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="k"&gt;name&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;rs_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+           &lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;cnt_ls_rs&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+           &lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ls&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cnt&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;cnt_ls&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rs&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cnt&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;cnt_rs&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+           &lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ls&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tot_order&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;tot_order&lt;/span&gt;
+    &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;baskets&lt;/span&gt; &lt;span class="n"&gt;ls&lt;/span&gt; &lt;span class="k"&gt;JOIN&lt;/span&gt;
+         &lt;span class="n"&gt;baskets&lt;/span&gt; &lt;span class="n"&gt;rs&lt;/span&gt; &lt;span class="k"&gt;ON&lt;/span&gt; &lt;span class="n"&gt;ls&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;order_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;rs&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;order_id&lt;/span&gt;
+                   &lt;span class="k"&gt;AND&lt;/span&gt; &lt;span class="n"&gt;ls&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;rs&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;
+    &lt;span class="k"&gt;GROUP&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;ls&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;rs&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ls_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;rs_name&lt;/span&gt;      
+&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;%-20s =&amp;gt; %20s&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ls_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;rs_name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;rules&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+       &lt;span class="n"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;1.0&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;cnt_rs&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="n"&gt;tot_order&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;expectation&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;   &lt;span class="c1"&gt;-- Expectation of right side&lt;/span&gt;
+       &lt;span class="n"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;1.0&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;cnt_ls_rs&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="n"&gt;tot_order&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;support&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;    &lt;span class="c1"&gt;-- Support of the rule: {left side} =&amp;gt; {right side}&lt;/span&gt;
+       &lt;span class="n"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;1.0&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;cnt_ls_rs&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="n"&gt;cnt_ls&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;confidence&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;    &lt;span class="c1"&gt;-- Confidence of the rule&lt;/span&gt;
+       &lt;span class="n"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;1.0&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;cnt_ls_rs&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;tot_order&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cnt_ls&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;cnt_rs&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="mf"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;lift&lt;/span&gt;  &lt;span class="c1"&gt;-- Lift of the rule&lt;/span&gt;
+&lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;rules&lt;/span&gt;
+&lt;span class="k"&gt;ORDER&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;lift&lt;/span&gt; &lt;span class="k"&gt;DESC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;confidence&lt;/span&gt; &lt;span class="k"&gt;DESC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;support&lt;/span&gt; &lt;span class="k"&gt;DESC&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;
+As we expect, all values of three metrics (support, confidence, and lift) are 1 because we only have one order. The first three rows are:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;                   rules                     | expectation | support | confidence | lift
+---------------------------------------------+-------------+---------+------------+------
+CARROTS 3LB          =&amp;gt;   PEPPER GREEN SWT   | 1.00        | 1.00    | 1.00       | 1.00
+LEMON                =&amp;gt;   CARROTS 3LB        | 1.00        | 1.00    | 1.00       | 1.00
+ROOSTER TOFU         =&amp;gt;   PEPPER GREEN SWT   | 1.00        | 1.00    | 1.00       | 1.00
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Write a failing test&lt;/h3&gt;
+&lt;p&gt;Suppose Neat has acquired another grocery store called &lt;strong&gt;Messy&lt;/strong&gt;. We'll apply the code of Neat to the data of Messy to see if it works. Let's look at the new data.
+&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;A receipt of store Messy&lt;br&gt;&lt;br&gt;&lt;/th&gt;
+&lt;th&gt;The entity-relationship diagram of Messy data&lt;br&gt;&lt;br&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;img alt src="/res/receipt_messy.jpg"&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img alt src="/res/ER_messy.png"&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;br&gt;
+We can see two receipts represent different database schemas.&lt;/p&gt;
+&lt;h4&gt;Insert the Messy data on the receipt into database&lt;/h4&gt;
+&lt;p&gt;&lt;font size=2&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;products_messy&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                 &lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;orders_messy&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;       &lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;order_items_messy&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;product_id | name         | category          order_id | order_date             order_item_id | order_id | product_id | quantity
+-----------+--------------+----------         ---------+-----------             --------------+----------+------------+---------
+2305       | KRO WHL MLK  | DAIRY             200      | 2016-01-01               1           | 200      | 2305       |  1
+2306       | KRO SKM MLK  | DAIRY                                                 2           | 200      | 2305       |  1
+2307       | ROMA TOMATO  | PRODUCE                                               3           | 200      | 2305       |  1
+2308       | KRO TKY GRND | NA                                                    4           | 200      | 2305       |  1
+                                                                                  5           | 200      | 2306       |  1
+                                                                                  6           | 200      | 2306       |  1
+                                                                                  7           | 200      | 2306       |  1
+                                                                                  8           | 200      | 2306       |  1
+                                                                                  9           | 200      | 2307       |  1
+                                                                                 10           | 200      | 2308       |  1  
+                                                                                 11           | 200      | 2308       |  1  
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;/font&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+Then we apply the SQL code of Neat to the Messy data. We only need to change the common table expression (CTE) &lt;code&gt;baskets&lt;/code&gt; to:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;WITH&lt;/span&gt; &lt;span class="n"&gt;baskets&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="c1"&gt;-- baskets of store Messy&lt;/span&gt;
+    &lt;span class="c1"&gt;-- without GROUP BY or DISTINCT&lt;/span&gt;
+    &lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;order_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="k"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+           &lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;OVER&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;PARTITION&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;cnt&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+           &lt;span class="n"&gt;tot_order&lt;/span&gt;
+    &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;order_items_messy&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;
+        &lt;span class="k"&gt;INNER&lt;/span&gt; &lt;span class="k"&gt;JOIN&lt;/span&gt; &lt;span class="n"&gt;products_messy&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="k"&gt;ON&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;
+        &lt;span class="k"&gt;CROSS&lt;/span&gt; &lt;span class="k"&gt;JOIN&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;COUNT&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;DISTINCT&lt;/span&gt; &lt;span class="n"&gt;order_id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;tot_order&lt;/span&gt; &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;order_items_messy&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;
+&lt;span class="p"&gt;),&lt;/span&gt;  
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;However, we get obvious &lt;strong&gt;wrong&lt;/strong&gt; results (the first three rows shown here):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;                    rules                      | expectation | support | confidence | lift
+-----------------------------------------------+-------------+---------+------------+------
+KRO SKM MLK          =&amp;gt;   KRO WHL MLK          | 4.00        | 16.00   | 4.00       | 1.00
+KRO WHL MLK          =&amp;gt;   KRO SKM MLK          | 4.00        | 16.00   | 4.00       | 1.00
+KRO TKY GRND         =&amp;gt;   KRO WHL MLK          | 4.00        | 8.00    | 4.00       | 1.00
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;
+All values are supposed to be 1 with only one order. The good news is that we now have a &lt;strong&gt;failing test case&lt;/strong&gt;. Let's figure out what's wrong with the original code.&lt;/p&gt;
+&lt;p&gt;The CTE &lt;code&gt;baskets&lt;/code&gt; is the building block for generating the rules. Its data pipeline is:&lt;/p&gt;
+&lt;p&gt;&lt;img alt src="/res/explain_cte_baskets.png"&gt;&lt;/p&gt;
+&lt;p&gt;The wrong counting happens in the window function, which is in the last step. We want the windown function to calculate the total number of each &lt;strong&gt;unique&lt;/strong&gt; product_id in each order.&lt;/p&gt;
+&lt;p&gt;If we use PostgreSQL and try &lt;code&gt;count(DISTINCT oi.product_id) OVER (PARTITION BY oi.product_id) AS cnt&lt;/code&gt;, we get &lt;code&gt;ERROR: DISTINCT is not implemented for window functions&lt;/code&gt;. So the &lt;code&gt;product_id&lt;/code&gt; has to be unique for each &lt;code&gt;order_id&lt;/code&gt; &lt;strong&gt;before&lt;/strong&gt; being piped into the window function. A common practice is to use GROUP BY.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Refactor the original code&lt;/h3&gt;
+&lt;p&gt;Change the common table expression &lt;code&gt;baskets&lt;/code&gt; to:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;WITH&lt;/span&gt; &lt;span class="n"&gt;baskets&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="c1"&gt;-- baskets of store Messy&lt;/span&gt;
+    &lt;span class="c1"&gt;-- using GROUP BY&lt;/span&gt;
+    &lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;order_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="k"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+           &lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;OVER&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;PARTITION&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;cnt&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+           &lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tot_order&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;tot_order&lt;/span&gt;
+    &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;order_items_messy&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;
+        &lt;span class="k"&gt;INNER&lt;/span&gt; &lt;span class="k"&gt;JOIN&lt;/span&gt; &lt;span class="n"&gt;products_messy&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="k"&gt;ON&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;
+        &lt;span class="k"&gt;CROSS&lt;/span&gt; &lt;span class="k"&gt;JOIN&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;COUNT&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;DISTINCT&lt;/span&gt; &lt;span class="n"&gt;order_id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;tot_order&lt;/span&gt; &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;order_items_messy&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;
+        &lt;span class="k"&gt;GROUP&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;order_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;oi&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="n"&gt;product_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="mf"&gt;.&lt;/span&gt;&lt;span class="k"&gt;name&lt;/span&gt;
+&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;After refactoring we get correct output (the first three rows shown here):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;                    rules                      | expectation | support | confidence | lift
+-----------------------------------------------+-------------+---------+------------+------
+KRO TKY GRND         =&amp;gt;   KRO WHL MLK          | 1.00        | 1.00    | 1.00       | 1.00
+KRO SKM MLK          =&amp;gt;   KRO TKY GRND         | 1.00        | 1.00    | 1.00       | 1.00
+KRO TKY GRND         =&amp;gt;   KRO SKM MLK          | 1.00        | 1.00    | 1.00       | 1.00
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now we have passed the failing test!&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+During the first iteration, we have known the data, built a basic association rules extracting function, written a failing test, and refactored the code to pass it. All of these actions are quick and lean. We are now comfortable to move on with more data or extracting complex rules. And remember: writing failing tests for each iteration.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Summary&lt;/h3&gt;
+&lt;p&gt;We have used an example to illustrate how data analysis can work hand in hand with testing to explore and produce results &lt;strong&gt;early and often&lt;/strong&gt;. TDD even advocates writing tests first before coding. Though we don't always have time budget and resources to do this kind of TDD, and during the exploratory phase testing might not be necessary, we keep TDD in mind and practice it if necessary for at least three reasons:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Writing test cases is a process of clarifying objectives of data analysis, and documenting how the code is intended to work. As code becomes more complex, the need for documentation increases.&lt;/li&gt;
+&lt;li&gt;TDD can help mitigate the fear and error of refactoring, modifying features, or adding new features. With test cases, we don't do them at the mercy of luck.&lt;/li&gt;
+&lt;li&gt;When switching from exploratory data analysis phase to production phase, the agile way of TDD can ensure that our data products are on the right track.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;
+Thanks for reading!&lt;/p&gt;</content><category term="TDD"></category><category term="Association Rules"></category><category term="SQL"></category></entry><entry><title>Temporal Dynamics of Data within a Time Frame</title><link href="https://geweiwang.github.io/2016/01/temporal-dynamics-of-data-within-a-time-frame.html" rel="alternate"></link><published>2016-01-10T00:00:00-05:00</published><updated>2016-01-10T00:00:00-05:00</updated><author><name>Gewei Wang</name></author><id>tag:geweiwang.github.io,2016-01-10:/2016/01/temporal-dynamics-of-data-within-a-time-frame.html</id><summary type="html">&lt;p&gt;Business never stands still, and neither does business data. Every data set is just a snapshot of a business. Each feature in data has a time frame before a snapshot date. Even within a time frame, some data still has temporal dynamics. We'll detail this point using three examples. The first is about historical prices of stock market; the third introduces a paper which shows a subtle temporal nature in beer reviews. The two are described briefly. The second is about the effect of cutoff dates on the target feature in survival analysis. &lt;br&gt;&lt;br&gt; &lt;img alt="beer review word cloud" src="/res/hop.png"&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Introduction&lt;/h3&gt;
+&lt;p&gt;Business never stands still, and neither does business data. Every data set is just a snapshot of a business. Each feature in data has a time frame before a snapshot date. Even within a time frame, some data still has temporal dynamics. We'll detail this point using three examples. The first is about historical prices of stock market; the third introduces a paper which shows a subtle temporal nature in beer reviews. The two are described briefly. The second is about the effect of cutoff dates on the target feature in survival analysis.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Adjusted closing prices of stocks&lt;/h3&gt;
+&lt;p&gt;Historical data can change. For example, if we download Apple stock historical data at different time, we might get different &lt;a href="http://www.investopedia.com/terms/a/adjusted_closing_price.asp"&gt;adjusted closing prices&lt;/a&gt; even during the same time periods because of prices adjustment for dividends and splits. &lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;The effect of cutoff dates on right-cencoring in Kaplan-Meier estimation&lt;/h3&gt;
+&lt;p&gt;Survival analysis estimates how long until a particular event happens. In business a typcial use case is service subscribers' tenure analysis. Here are a few key concepts of survival analysis.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Tenure&lt;/strong&gt; is censored data, which means the information about tenure is partially known.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Hazard probabilities&lt;/strong&gt; measure the probability that an event succumbs to a risk at a given time &lt;em&gt;t&lt;/em&gt;. The hazard probability at tenure &lt;em&gt;t&lt;/em&gt; is the ratio between two numbers:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Population that succumbed to the risk &lt;span class="math"&gt;\(d_j\)&lt;/span&gt;: The number of customers who stopped at exactly tenure &lt;span class="math"&gt;\(t_j\)&lt;/span&gt;.&lt;/li&gt;
+&lt;li&gt;Population at risk &lt;span class="math"&gt;\(n_j\)&lt;/span&gt;: The number of customers whose tenure is greater than or equal to &lt;span class="math"&gt;\(t_j\)&lt;/span&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Survival&lt;/strong&gt; is the probability that an event has not succumbed to the risk up to a given time &lt;em&gt;t&lt;/em&gt;. In other words, survival accumulates information about the inverse of hazards. The survival at tenure &lt;em&gt;t&lt;/em&gt; is the product of one minus the hazards for all tenures less than &lt;em&gt;t&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href="https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator"&gt;Kaplan–Meier estimation&lt;/a&gt;&lt;/strong&gt;(aka, KM method, or product-limit estimator) is one of survivial analysis methods. In 1958 Kaplan and Meier showed that it was, in fact, the nonparametric maximum likelihood estimator. This gave the method a solid theoretical justification. The KM estimation defines survival as&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{S}(t) = \prod_{j:t_j\leq t}\left(1-\frac{d_j}{n_j}\right)$$&lt;/div&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;
+Let's look at an example. &lt;code&gt;idata&lt;/code&gt; is a sample data of service subscribers.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;pd&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;io&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;StringIO&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Snippets of subscribers data.&lt;/span&gt;
+&lt;span class="c1"&gt;# Null stop_date means the user is right-censored&lt;/span&gt;
+&lt;span class="c1"&gt;# censored : 1 - censored; 0 - uncensored&lt;/span&gt;
+&lt;span class="n"&gt;idata&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;StringIO&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="sd"&gt;user_id     market      channel      start_date    stop_date    censored&lt;/span&gt;
+&lt;span class="sd"&gt;2488577    Market-B    Channel-C3    2008-06-28                    1&lt;/span&gt;
+&lt;span class="sd"&gt;2584066    Market-A    Channel-C3    2008-06-28                    1&lt;/span&gt;
+&lt;span class="sd"&gt;2574285    Market-A    Channel-C1    2008-11-28                    1&lt;/span&gt;
+&lt;span class="sd"&gt;2201921    Market-B    Channel-C3    2008-09-18                    1&lt;/span&gt;
+&lt;span class="sd"&gt;2776956    Market-A    Channel-C2    2008-09-28                    1&lt;/span&gt;
+&lt;span class="sd"&gt;1891311    Market-B    Channel-C3    2008-09-28                    1&lt;/span&gt;
+&lt;span class="sd"&gt;1995282    Market-B    Channel-C1    2008-05-28    2008-10-28      0&lt;/span&gt;
+&lt;span class="sd"&gt;2171689    Market-A    Channel-C1    2008-09-02    2008-11-02      0&lt;/span&gt;
+&lt;span class="sd"&gt;1597753    Market-A    Channel-C1    2008-10-01    2008-12-21      0&lt;/span&gt;
+&lt;span class="sd"&gt;1987770    Market-B    Channel-C2    2008-10-08    2008-12-28      0&lt;/span&gt;
+&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;df&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read_csv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;idata&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="se"&gt;\t&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;parse_dates&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;start_date&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;stop_date&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;
+This is &lt;strong&gt;right-censored&lt;/strong&gt; data, which means for currently active users we know when they started, but not when they will stop. Suppose the &lt;strong&gt;snapshot date&lt;/strong&gt; of the data is &lt;code&gt;2008-12-28&lt;/code&gt;. The tenures can be calculated by three variables: &lt;code&gt;start_date&lt;/code&gt;, &lt;code&gt;stop_date&lt;/code&gt;, and &lt;code&gt;censored&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;All the features in the data come from a time frame before a &lt;strong&gt;cutoff date&lt;/strong&gt;. If the cutoff equals to the snapshot date, we can use the data to &lt;strong&gt;profile&lt;/strong&gt; customers during the time frame. Let's use code plotting to illustrate the data.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;plot_right_censor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;X&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;snapshot_date&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cutoff_date&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                     &lt;span class="n"&gt;censored&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;censored&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                     &lt;span class="n"&gt;start&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;start_date&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                     &lt;span class="n"&gt;stop&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;stop_date&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Plot to illustrate the effect of cutoff on right-censoring.&lt;/span&gt;
+
+&lt;span class="sd"&gt;    Parameters&lt;/span&gt;
+&lt;span class="sd"&gt;    ----------&lt;/span&gt;
+
+&lt;span class="sd"&gt;    snapshot_date : str, format: &amp;#39;yyyy-mm-dd&amp;#39;&lt;/span&gt;
+&lt;span class="sd"&gt;        The date when a snapshot of the data was taken.        &lt;/span&gt;
+
+&lt;span class="sd"&gt;    cutoff_date : str, default None, format: &amp;#39;yyyy-mm-dd&amp;#39;&lt;/span&gt;
+&lt;span class="sd"&gt;        Define the end of the time frame.&lt;/span&gt;
+&lt;span class="sd"&gt;        The default cutoff_date equals to snapshot_date.&lt;/span&gt;
+&lt;span class="sd"&gt;        cutoff_date should be earlier than snapshot_date.        &lt;/span&gt;
+
+&lt;span class="sd"&gt;    censored, start, stop : str&lt;/span&gt;
+&lt;span class="sd"&gt;        The names of columns in DataFrame for censored, &lt;/span&gt;
+&lt;span class="sd"&gt;        start_date, and stop_date.&lt;/span&gt;
+&lt;span class="sd"&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="c1"&gt;# code @ https://github.com/geweiwang&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here is an illustration of the data and its survival curve. We see the default cutoff date equals to the snapshot date.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;snapshot_date&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;2008-12-28&amp;#39;&lt;/span&gt;
+&lt;span class="n"&gt;plot_right_censor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;df&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;snapshot_date&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;| 
+--- | ---
+&lt;img alt src="/res/right_censor_1.png"&gt; | &lt;img alt src="/res/survival_curve_1.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;
+If we set the cutoff date at &lt;code&gt;2008-12-18&lt;/code&gt;, the data and its survival curve change. Two previous uncensored customers become censored.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;cutoff_date&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;2008-12-18&amp;#39;&lt;/span&gt;
+&lt;span class="n"&gt;plot_right_censor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;df&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;snapshot_date&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cutoff_date&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;| 
+--- | ---
+&lt;img alt src="/res/right_censor_2.png"&gt; | &lt;img alt src="/res/survival_curve_2.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;
+If we move the cutoff date further to &lt;code&gt;2008-11-18&lt;/code&gt;, the data and its survival curve change again. The data of a customer who started the service after the cutoff has been excluded from the KM estimation.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;cutoff_date&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;2008-11-18&amp;#39;&lt;/span&gt;
+&lt;span class="n"&gt;plot_right_censor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;df&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;snapshot_date&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cutoff_date&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;| 
+--- | ---
+&lt;img alt src="/res/right_censor_3.png"&gt; | &lt;img alt src="/res/survival_curve_3.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+The changes of numbers of customers are summerized in a table.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Cutoff      | Censored | Uncensored |  Total
+------------+----------+------------+--------
+2008-12-28  |    6     |     4      |   10
+2008-12-18  |    8     |     2      |   10
+2008-11-18  |    7     |     2      |    9
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;
+We can see the changes of the censored data over the different cutoff dates:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Some customers come to active again.&lt;/li&gt;
+&lt;li&gt;Some customers are excluded from the KM estimation.&lt;/li&gt;
+&lt;li&gt;The original profiling data might be used for prediction modeling because the target information comes from a time frame after the new earlier cutoff date.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;
+Next we'll see another example about customers behavior changing with time, but in a little more subtle way.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Customers' beer reviews change with their experience&lt;/h3&gt;
+&lt;p&gt;Customer reviews are traditionally used for sentiment analysis that treats each customer's review history as a series of unordered event. However, when we have big enough data like Amazon customer reviews or RateBeer beer reviews, we have many customers who review multiple times. These customers' tastes may change &lt;strong&gt;over time&lt;/strong&gt;, so do their reviews.&lt;/p&gt;
+&lt;p&gt;The paper &lt;a href="http://i.stanford.edu/~julian/pdfs/www13.pdf" target="_blank"&gt;&lt;em&gt;Modeling the Evolution of User Expertise through Online Reviews&lt;/em&gt;&lt;/a&gt; by Julian McAuley and Jure Leskovec from Stanford digs deep into this kind of data and gets interesting insights on recommending products to customers. They encode temporal information into models via the proxy of user experience. &lt;/p&gt;
+&lt;p&gt;They demonstrate the evolution of user tastes by analyzing millions of beer reviews. And they find over time some customers grow from 'beer novices' to 'beer experts' and acquire a common taste: hops. Beginners give higher ratings to almost all lagers (less hoppy), while experts give higher ratings to almost all strong ales (more hoppy); thus they conclude that strong ales might be an ‘acquired taste’.  &lt;/p&gt;
+&lt;p&gt;Let's sneak a peak at &lt;a href="http://snap.stanford.edu/data/finefoods.txt.gz"&gt;Amazon customers's beer reviews&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Subset beer-related reviews&lt;/li&gt;
+&lt;li&gt;Remove duplicate records&lt;/li&gt;
+&lt;li&gt;Filter the data by the number of reviews greater than five&lt;/li&gt;
+&lt;li&gt;Stop the default word 'beer', and put the results to an image using &lt;a href="https://github.com/amueller/word_cloud"&gt;word_cloud&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt src="/res/hop.png"&gt;&lt;/p&gt;
+&lt;p&gt;We can see customers with multiple beer reviews talk a lot about 'ale' and 'hop' -- a possible sign of customers having acquired this 'expert' taste over time.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Summary&lt;/h3&gt;
+&lt;p&gt;Through the three examples, we see even during a time frame the data is not static but dynamic.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Situation changes, so is historical data adjusted to stay aligned with current situation. Adjusted closing prices of stocks are the case.&lt;/li&gt;
+&lt;li&gt;For Kaplan-Meier estimation, the censored data changes with cutoff dates moving backward.&lt;/li&gt;
+&lt;li&gt;Along customer review timeline there might be latent signals of changing tastes. Recommender systems can extract this temporal feature and model customer evolution for better performance.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Data is almost always dynamic -- some obvious, some subtle. Making good use of the temporal nature of data might give us interesting insights.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+Thanks for reading!&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Python"></category><category term="Survival analysis"></category><category term="Time sense"></category></entry><entry><title>Large JSON Data Wrangling</title><link href="https://geweiwang.github.io/2015/12/large-json-data-wrangling.html" rel="alternate"></link><published>2015-12-30T00:00:00-05:00</published><updated>2015-12-30T00:00:00-05:00</updated><author><name>Gewei Wang</name></author><id>tag:geweiwang.github.io,2015-12-30:/2015/12/large-json-data-wrangling.html</id><summary type="html">&lt;p&gt;In this post, we'll load a large GeoJSON file into MongoDB by ijson (a Python package). Then we'll answer two questions using MongoDB aggregation pipelines; SQL queries are also given for comparisions. We'll wrap up with visualizing querying results on a map. &lt;br&gt;&lt;br&gt;&lt;img alt="choropleth" src="/res/choropleth_snapshot.png"&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Introduction&lt;/h3&gt;
+&lt;p&gt;In this post, we'll load a large GeoJSON file into MongoDB by ijson (a Python package). Then we'll answer two questions using MongoDB aggregation pipelines; SQL queries are also given for comparisions. We'll wrap up with visualizing querying results on a map.&lt;/p&gt;
+&lt;h4&gt;How large is large?&lt;/h4&gt;
+&lt;p&gt;A file large for a computer may be nothing for another powerful one. By 'large', we're not talking about big data stored and distributed across clusters of hundreds of servers operating in parallel, but files that can't be handled easily by our laptops or a single server.&lt;/p&gt;
+&lt;h4&gt;JSON&lt;/h4&gt;
+&lt;p&gt;JSON is a popular lightweight data interchange format for internet of things. Unlike CSV files whose structures can be easily inferred from the header or a few lines, JSON files have flexible schemas which are good for storing and retriving unstructred data, but not easy to be read in chucks. &lt;/p&gt;
+&lt;p&gt;A JSON file is probably large for a computer if:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The cursor of the text editor such as Vim or Emacs gets bogged down in the file.&lt;/li&gt;
+&lt;li&gt;The computer becomes slow with frequent not responding when reading the file using Python &lt;code&gt;json.load()&lt;/code&gt; or &lt;code&gt;pandas.read_json()&lt;/code&gt; because its size is too much for the memory.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;
+Now we have a 1.1 GB US Zip3 GeoJSON file, and suppose it's large for our computers. Let's figure out how to wrangle it.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Take a look at the data&lt;/h3&gt;
+&lt;p&gt;Linux command line comes in handy when we want to get a feel for our data.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ less uszip3.json
+
+&lt;span class="o"&gt;{&lt;/span&gt;
+  &lt;span class="s2"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;FeatureCollection&amp;quot;&lt;/span&gt;,
+  &lt;span class="s2"&gt;&amp;quot;features&amp;quot;&lt;/span&gt;: &lt;span class="o"&gt;[&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;Feature&amp;quot;&lt;/span&gt;,
+      &lt;span class="s2"&gt;&amp;quot;geometry&amp;quot;&lt;/span&gt;: &lt;span class="o"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;Polygon&amp;quot;&lt;/span&gt;,
+        &lt;span class="s2"&gt;&amp;quot;coordinates&amp;quot;&lt;/span&gt;: &lt;span class="o"&gt;[&lt;/span&gt;
+          &lt;span class="o"&gt;[&lt;/span&gt;
+            &lt;span class="o"&gt;[&lt;/span&gt;
+              -118.30289799964294,
+              &lt;span class="m"&gt;34&lt;/span&gt;.15840300009842
+            &lt;span class="o"&gt;]&lt;/span&gt;,
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ tail -12 uszip3.json
+
+      &lt;span class="s2"&gt;&amp;quot;properties&amp;quot;&lt;/span&gt;: &lt;span class="o"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;ZIP3&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;999&amp;quot;&lt;/span&gt;,
+        &lt;span class="s2"&gt;&amp;quot;POP13_SQMI&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;7.20000000000e-001&amp;quot;&lt;/span&gt;,
+        &lt;span class="s2"&gt;&amp;quot;Shape_Area&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;2.79540779104e+000&amp;quot;&lt;/span&gt;,
+        &lt;span class="s2"&gt;&amp;quot;Shape_Leng&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;7.63101677519e+001&amp;quot;&lt;/span&gt;,
+        &lt;span class="s2"&gt;&amp;quot;POP2013&amp;quot;&lt;/span&gt;: &lt;span class="m"&gt;5425&lt;/span&gt;,
+        &lt;span class="s2"&gt;&amp;quot;STATE&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;AK&amp;quot;&lt;/span&gt;,
+        &lt;span class="s2"&gt;&amp;quot;SQMI&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;7.58330000000e+003&amp;quot;&lt;/span&gt;
+      &lt;span class="o"&gt;}&lt;/span&gt;
+    &lt;span class="o"&gt;}&lt;/span&gt;
+  &lt;span class="o"&gt;]&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Profile time and memory usage&lt;/h3&gt;
+&lt;p&gt;We're trying to read the JSON file using pandas and ijson. To make comparisons quantitatively, we harness a decorator to measure time and memory consumed by functions.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;inspect&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;wraps&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;memory_profiler&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;memory_usage&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;partial&lt;/span&gt;
+
+&lt;span class="n"&gt;measure_memory&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;partial&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;memory_usage&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;proc&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;interval&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;timeout&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;measure_usage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;A decorator to profile the usage of time and memory by a function&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="nd"&gt;@wraps&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;wrapper&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwargs&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;        
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Before function &amp;lt;{}&amp;gt;, memory usage: {:.2f} MiB&amp;quot;&lt;/span&gt;
+              &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;measure_memory&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt;
+        &lt;span class="n"&gt;start&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwargs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;end&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;After function &amp;lt;{}&amp;gt; done, memory usage: {:.2f} MiB&amp;quot;&lt;/span&gt;
+              &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;measure_memory&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt;
+
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Function &amp;lt;{}&amp;gt; took {:.2f} s&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;end&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;start&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;wrapper&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Load the file using pandas.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;INFILE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;uszip3.json&amp;#39;&lt;/span&gt;   &lt;span class="c1"&gt;# the large GeoJSON file&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;pd&lt;/span&gt;
+
+&lt;span class="nd"&gt;@measure_usage&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;read_by_pandas&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;infile&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;df&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read_json&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;infile&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;In function &amp;lt;{}&amp;gt;, memory usage: {:0.1f} MiB&amp;quot;&lt;/span&gt;
+          &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;inspect&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stack&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;measure_memory&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt;
+
+&lt;span class="n"&gt;read_by_pandas&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;INFILE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; 
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We also load the file using ijson, which will be talked about soon. To make comparisions between the two packages, the measuring results are listed here.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;                                   | &amp;lt;read_by_pandas&amp;gt; |  &amp;lt;ijson_to_mongodb&amp;gt;
+-----------------------------------|------------------|---------------------
+Before function, memory usage:     |    73.86 MiB     |     40.00 MiB
+In function, memory usage:         |   1916.3 MiB     |     60.61 MiB
+After function done, memory usage: |    71.19 MiB     |     60.62 MiB
+Function took                      |    89.61 s       |     1065.59 s
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;From the table, we can see the huge differences between pandas.read_json() and ijson:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;pandas uses about 1.9 GB memory just loading the file to DataFrame. I could barely do anything else on my computer during the reading. If I would try to parse the JSON file, chances are my computer won't respond any more and I have to restart it.&lt;/li&gt;
+&lt;li&gt;The function &lt;code&gt;ijson_to_mongodb&lt;/code&gt; not only reads the file but parse it and insert data into MongoDB. It took about 18 minutes, but the memory usage was only about 60 MB. At the same time I did other things normally on my computer.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Python standard library json has the same issue as pandas.read_json(), so we need other packages to handle the large JSON file.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Read the file in a lazy way&lt;/h3&gt;
+&lt;p&gt;Python iterator is an object representing a stream of data. It doesn't read the whole thing into memory, but returns its members one at a time. &lt;a href="https://pypi.python.org/pypi/ijson"&gt;&lt;strong&gt;ijson&lt;/strong&gt;&lt;/a&gt; is an iterative JSON parser - a Python package we'll use.&lt;/p&gt;
+&lt;p&gt;First let's get the schema of the JSON file using ijson.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;ijson&lt;/span&gt;
+
+&lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;INFILE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;r&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;objects&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ijson&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;items&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;features.item&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;ob&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;objects&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Top level keys:        {}&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ob&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;())))&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&amp;#39;geometry&amp;#39; has keys:   {}&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+              &lt;span class="s2"&gt;&amp;quot;&amp;#39;properties&amp;#39; has keys: {}&amp;quot;&lt;/span&gt;
+              &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ob&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;geometry&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;()),&lt;/span&gt; 
+                      &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ob&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;properties&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;())))&lt;/span&gt;
+        &lt;span class="k"&gt;break&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Top level keys:        [&amp;#39;geometry&amp;#39;, &amp;#39;properties&amp;#39;, &amp;#39;type&amp;#39;]
+&amp;#39;geometry&amp;#39; has keys:   [&amp;#39;type&amp;#39;, &amp;#39;coordinates&amp;#39;]
+&amp;#39;properties&amp;#39; has keys: [&amp;#39;Shape_Area&amp;#39;, &amp;#39;SQMI&amp;#39;, &amp;#39;Shape_Leng&amp;#39;, &amp;#39;POP2013&amp;#39;, &amp;#39;ZIP3&amp;#39;, &amp;#39;STATE&amp;#39;, &amp;#39;POP13_SQMI&amp;#39;]
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Load the JSON file into MongoDB&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;The reason we load the JSON file into MongoDB&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Ijson is good but slow. It's unacceptable to always wait for minutes every time we explore the file. That's the case MongoDB excels in -- the powerful MongoDB engine lets us explore the data fast and easily.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+MongoDB provides a tool &lt;em&gt;mongoimport&lt;/em&gt; which is good for importing line-delimited JSON files, and content export created by another tool &lt;em&gt;mongoexport&lt;/em&gt;. However, the tool often gave me a headache when importing JSON files created by other third-party export tools. This US Zip3 GeoJSON was no exception.&lt;/p&gt;
+&lt;p&gt;A better way is to use PyMongo, a driver working with MongoDB from Python. Let's look at the code.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;simplejson&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pymongo&lt;/span&gt;
+
+&lt;span class="n"&gt;DEBUG&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;False&lt;/span&gt;                          &lt;span class="c1"&gt;# set DEBUG to False for production&lt;/span&gt;
+&lt;span class="n"&gt;INDENT_NUM&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;DEBUG&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="bp"&gt;None&lt;/span&gt;      &lt;span class="c1"&gt;# for json pretty printing&lt;/span&gt;
+
+&lt;span class="n"&gt;json_dumps&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;partial&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dumps&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;indent&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;INDENT_NUM&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nd"&gt;@measure_usage&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;ijson_to_mongodb&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;infile&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;collection&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Read a JSON file lazily, then insert data into MongoDB&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;    
+    &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;infile&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;r&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;objects&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ijson&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;items&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;features.item&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;cnt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;ob&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;objects&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;collection&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;insert_one&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;loads&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;json_dumps&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ob&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;In function &amp;lt;{}&amp;gt;, memory usage: {:0.2f} MiB&amp;quot;&lt;/span&gt;
+              &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;inspect&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stack&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;measure_memory&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;    
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;client&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pymongo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MongoClient&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;localhost&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;27017&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;db&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;datalab&lt;/span&gt;           &lt;span class="c1"&gt;# the MongoDB database we use&lt;/span&gt;
+        &lt;span class="n"&gt;collection&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;uszip3&lt;/span&gt;        &lt;span class="c1"&gt;# collection in the database&lt;/span&gt;
+        &lt;span class="n"&gt;collection&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find_one&lt;/span&gt;&lt;span class="p"&gt;({})&lt;/span&gt;       &lt;span class="c1"&gt;# quick test the database&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="n"&gt;pymongo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;errors&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;PyMongoError&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;**MongoDB Error**&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;ijson_to_mongodb&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;INFILE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;collection&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="c1"&gt;# it took about 18 minutes&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;
+&lt;em&gt;Note&lt;/em&gt;:
+I use &lt;code&gt;import simplejson as json&lt;/code&gt; instead of Python standard library &lt;em&gt;json&lt;/em&gt; because the latter doesn't deal with decimal numbers in latitude and longitude. To avoid TypeError, you have to define a helper function for the &lt;em&gt;default&lt;/em&gt; parameter of &lt;code&gt;json.dumps()&lt;/code&gt;. Fortunately, &lt;code&gt;simplejson.dumps()&lt;/code&gt; serializes decimal numbers to JSON with full precision. See &lt;a href="https://simplejson.readthedocs.io/en/latest/#simplejson.dump"&gt;here&lt;/a&gt; for details.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Ask databases&lt;/h3&gt;
+&lt;p&gt;Now that we have the JSON data in MongoDB, let's ask two simple questions, and answer them by both MongoDB aggregation pipelines and SQL (PostgreSQL) queries. (I've imported the data except for the geometry information into PostgreSQL.)&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;strong&gt;Questio 1:&lt;/strong&gt; What are the top three states in terms of the number of zip3 codes in each state?&lt;/p&gt;
+&lt;p&gt;MongoDB solution:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;rank_state_by_number_of_zip3&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;collection&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;N&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Return a cursor representing top N state &lt;/span&gt;
+&lt;span class="sd"&gt;    in terms of the number of zip3 codes&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;pipeline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$match&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;   &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;properties.POP2013&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$gt&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;}}},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$project&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;_id&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;properties&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;}},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$group&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;   &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;_id&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;   &lt;span class="s1"&gt;&amp;#39;$properties.STATE&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                      &lt;span class="s1"&gt;&amp;#39;count&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$sum&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;}}},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$sort&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;    &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;count&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;}},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$limit&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;   &lt;span class="n"&gt;N&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;collection&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;aggregate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pipeline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;{&amp;#39;_id&amp;#39;: &amp;#39;CA&amp;#39;, &amp;#39;count&amp;#39;: 57}
+{&amp;#39;_id&amp;#39;: &amp;#39;NY&amp;#39;, &amp;#39;count&amp;#39;: 50}
+{&amp;#39;_id&amp;#39;: &amp;#39;TX&amp;#39;, &amp;#39;count&amp;#39;: 47}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;
+SQL solution:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;-- The top 3 states in terms of the number of zip3 codes in each state&lt;/span&gt;
+&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;state&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;zip3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;cnt_zip3&lt;/span&gt;
+&lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;uszip3&lt;/span&gt;
+&lt;span class="k"&gt;WHERE&lt;/span&gt; &lt;span class="n"&gt;pop2013&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mf"&gt;0&lt;/span&gt;
+&lt;span class="k"&gt;GROUP&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;state&lt;/span&gt;
+&lt;span class="k"&gt;ORDER&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;cnt_zip3&lt;/span&gt; &lt;span class="k"&gt;DESC&lt;/span&gt;
+&lt;span class="k"&gt;LIMIT&lt;/span&gt; &lt;span class="mf"&gt;3&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;state  | cnt_zip3
+-------+----------
+CA     |   57
+NY     |   50
+TX     |   47
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;&lt;br&gt;
+&lt;strong&gt;Questio 2:&lt;/strong&gt; What are the top three zip3 codes by population in North Carolina (NC) and Virgina (VA)?&lt;/p&gt;
+&lt;p&gt;MongoDB solution:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;rank_zip3_by_pop_each_state&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;collection&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;N&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;state&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Return a cursor representing top N zip3 by population in the state&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;state&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;state should be a string&amp;#39;&lt;/span&gt;
+
+    &lt;span class="n"&gt;pipeline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+            &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;$match&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;properties.STATE&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;$eq&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;state&lt;/span&gt;&lt;span class="p"&gt;}}},&lt;/span&gt;
+            &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;$project&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;_id&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+                          &lt;span class="s2"&gt;&amp;quot;properties.ZIP3&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+                          &lt;span class="s2"&gt;&amp;quot;properties.POP2013&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+                          &lt;span class="s2"&gt;&amp;quot;properties.STATE&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;}},&lt;/span&gt;
+            &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;$sort&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;properties.POP2013&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;}},&lt;/span&gt;
+            &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;$limit&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;N&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;            
+    &lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;collection&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;aggregate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pipeline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;    
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;    
+    &lt;span class="c1"&gt;# ... same code as above    &lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;N&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;state&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;NC&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;VA&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;rank_zip3_by_pop_each_state&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;collection&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;N&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;state&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;    
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;{&amp;#39;properties&amp;#39;: {&amp;#39;POP2013&amp;#39;: 1111755, &amp;#39;STATE&amp;#39;: &amp;#39;NC&amp;#39;, &amp;#39;ZIP3&amp;#39;: &amp;#39;275&amp;#39;}}
+{&amp;#39;properties&amp;#39;: {&amp;#39;POP2013&amp;#39;: 857761, &amp;#39;STATE&amp;#39;: &amp;#39;NC&amp;#39;, &amp;#39;ZIP3&amp;#39;: &amp;#39;283&amp;#39;}}
+{&amp;#39;properties&amp;#39;: {&amp;#39;POP2013&amp;#39;: 819280, &amp;#39;STATE&amp;#39;: &amp;#39;NC&amp;#39;, &amp;#39;ZIP3&amp;#39;: &amp;#39;282&amp;#39;}}
+{&amp;#39;properties&amp;#39;: {&amp;#39;POP2013&amp;#39;: 886499, &amp;#39;STATE&amp;#39;: &amp;#39;VA&amp;#39;, &amp;#39;ZIP3&amp;#39;: &amp;#39;201&amp;#39;}}
+{&amp;#39;properties&amp;#39;: {&amp;#39;POP2013&amp;#39;: 573094, &amp;#39;STATE&amp;#39;: &amp;#39;VA&amp;#39;, &amp;#39;ZIP3&amp;#39;: &amp;#39;234&amp;#39;}}
+{&amp;#39;properties&amp;#39;: {&amp;#39;POP2013&amp;#39;: 547384, &amp;#39;STATE&amp;#39;: &amp;#39;VA&amp;#39;, &amp;#39;ZIP3&amp;#39;: &amp;#39;232&amp;#39;}}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;
+SQL solution:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;-- The top 3 zip3 by population in North Carolina (NC) and Virgina (VA)&lt;/span&gt;
+&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;state&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;zip3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pop2013&lt;/span&gt;
+&lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;zip3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pop2013&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;state&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+             &lt;span class="n"&gt;rank&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="k"&gt;OVER&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;PARTITION&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;state&lt;/span&gt; &lt;span class="k"&gt;ORDER&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;pop2013&lt;/span&gt; &lt;span class="k"&gt;DESC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="n"&gt;pos&lt;/span&gt;
+      &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;uszip3&lt;/span&gt;
+      &lt;span class="k"&gt;WHERE&lt;/span&gt; &lt;span class="n"&gt;state&lt;/span&gt; &lt;span class="k"&gt;IN&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;NC&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;VA&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;AND&lt;/span&gt; &lt;span class="n"&gt;pop2013&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mf"&gt;0&lt;/span&gt;
+      &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;
+&lt;span class="k"&gt;WHERE&lt;/span&gt; &lt;span class="n"&gt;pos&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="mf"&gt;3&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;state  | zip3  | pop2013
+-------+-------+---------
+NC     | 275   | 1111755
+NC     | 283   | 857761
+NC     | 282   | 819280
+VA     | 201   | 886499
+VA     | 234   | 573094
+VA     | 232   | 547384
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;br&gt;
+The output from both databases is same. In PostgreSQL, it's convinent to use the window function &lt;code&gt;RANK()&lt;/code&gt; to get the results. In MongoDB I had to iterate over each state. Are there similar window functions in MongoDB?&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Retrieving and visualizing documents&lt;/h3&gt;
+&lt;p&gt;With a GeoJSON file, it's natural to look at the data on a map. We extract top 10 zip3 by population in Washington state, and use &lt;a href="http://leafletjs.com/" target="_blank"&gt;Leaflet&lt;/a&gt; to create a choropleth map.&lt;/p&gt;
+&lt;p&gt;&lt;a href="/res/choropleth_wa.html" target="_blank"&gt;
+&lt;img src="/res/choropleth_snapshot.png" alt="map snapshot"&gt;
+&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h3&gt;Summary&lt;/h3&gt;
+&lt;p&gt;We have used an iterative JSON parser ijson to load a large GeoJSON file into databases. Then we test them by asking two simple questions, extracting a subset of the data, and visualizing it on a map. Here are further ideas:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It's possible to reduce the size of an indented JSON file by removing the leading spaces. &lt;code&gt;tr&lt;/code&gt; squeeze or &lt;code&gt;sed&lt;/code&gt; replace can do it, but you should know what you do to guarantee no information is lost.&lt;/li&gt;
+&lt;li&gt;Both relational databases and NoSQL document databases are powerful but for different applications. They are not good at everything. Technology changes fast, so in the near future PostgreSQL might support horizontal scaling well, and MongoDB might support complex transactions and more powerful analytic capabilities.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;
+Thanks for reading!&lt;/p&gt;</content><category term="JSON"></category><category term="Python"></category><category term="MongoDB"></category><category term="SQL"></category></entry></feed>

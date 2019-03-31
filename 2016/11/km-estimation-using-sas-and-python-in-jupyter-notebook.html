@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- ## for client-side less
+  <link rel="stylesheet/less" type="text/css" href="https://geweiwang.github.io/theme/css/style.less">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/less.js/1.7.3/less.min.js" type="text/javascript"></script>
+  -->
+
+  <link href="https://geweiwang.github.io/favicon.ico?v=2" rel="icon">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/style.min.css">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/pygments.css">
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Inconsolata">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/hatena-bookmark-icon.css">
+
+  <script>
+  function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 50 + 'px';
+  }
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Gewei Wang">
+  <meta name="description" content="Posts and writings by Gewei Wang">
+
+  <link href="https://geweiwang.github.io/atom.xml" type="application/atom+xml" rel="alternate" title="Gewei's Blog Atom" />
+
+<meta name="keywords" content="SAS, Python, Survival Analysis">
+
+  <title>
+    Gewei's Blog
+&ndash; KM Estimation Using SAS and Python in Jupyter Notebook  </title>
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-71693744-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
+
+<body>
+  <main>
+    <header>
+      <div class="site_name">
+        <a href="https://geweiwang.github.io">Gewei's Blog</a>&emsp;
+        <a href="https://geweiwang.github.io/archives.html">Archive</a>&emsp;
+        <!-- <a href="https://geweiwang.github.io/2015/12/about-me.html">Me</a>&emsp; -->
+        <a href="https://github.com/GeweiWang" target="_blank"><i class="fa fa-github-alt"></i> </a>&emsp;
+        <a href="https://geweiwang.github.io/atom.xml" target="_blank" title="Feed">
+          <i class="fa fa-rss"></i>
+        </a>&ensp;
+      </div>
+
+    </header>
+
+<article>
+  <div class="article_title">
+    <h1><a href="https://geweiwang.github.io/2016/11/km-estimation-using-sas-and-python-in-jupyter-notebook.html">KM Estimation Using SAS and Python in Jupyter Notebook</a></h1>
+  </div>
+  <div class="article_meta">
+    <p class="article_meta_post_date">Mon, 21 Nov 2016</p>
+ Tags:
+      <a href="https://geweiwang.github.io/tag/sas.html"> #SAS</a>,      <a href="https://geweiwang.github.io/tag/python.html"> #Python</a>,      <a href="https://geweiwang.github.io/tag/survival-analysis.html"> #Survival Analysis</a>    </p>
+  </div>
+  <div class="article_text">
+    <p><br></p>
+<h3>Introduction</h3>
+<p>SAS has taken another step to embrace open source by bringing <a href="http://blogs.sas.com/content/sasdummy/2016/04/24/how-to-run-sas-programs-in-jupyter-notebook/" target="_blank">SAS and Jupyter Notebook</a> together. SAS coding in Jupyter Notebook is available in April for SAS Linux, and in July for SAS University Edition. I'll use Jupyter notebooks to compare the output of Kaplan-Meier (KM) survival estimatation using SAS and Python.</p>
+<p><br></p>
+<h4>Background</h4>
+<p>SAS KM estimation is in <code>PROC LIFETEST</code>. We'll see it soon in the SAS notebook.</p>
+<p><a href="https://github.com/GeweiWang/kmsurvival"><code>KMSurvial</code></a> is an implementation of KM estimation in Python. It's a practical program for comparing survial probabilities qualitatively among groups. And it's also small, fast, and easy to use.</p>
+<p>The reason for writing a new KM estimator is that some features I want are not available or flexible in other implementations as of early 2016. These features include:</p>
+<ul>
+<li>Differentiate between the snapshot date and cutoff dates of a data set.</li>
+<li>Support hierarchical strata.</li>
+<li>Flexible combination of groups for comparisions.</li>
+<li>Support multiple data input formats.</li>
+<li>Users can easily get hazards and survival functions which can be piped into visualziaiton or further data processing.</li>
+</ul>
+<p><br><br>
+We're going to first check quantative results of <code>KMSurvival</code> against SAS's -- a process of data loading, exploring, cleaning, and reshaping. Then we'll compare both qualitatively. </p>
+<p>The rest of the post is written in Jupyter Notebook. There are two parts: one uses SAS; another Python.</p>
+<p><br>
+<iframe src="/res/sas_in_jupyter_for_post.html" height="4100" width="100%" frameborder="0" scrolling="no"></iframe>
+<br>
+<iframe src="/res/KMSurvival_for_post.html" frameborder="0" scrolling="no" width="100%" onload="resizeIframe(this)" /></p>
+<p><br>
+<em>The original notebooks are here: <a href="https://nbviewer.jupyter.org/github/GeweiWang/notebooks/blob/master/sas_in_jupyter_for_post.ipynb" target="_blank">one in SAS</a>; <a href="https://nbviewer.jupyter.org/github/GeweiWang/notebooks/blob/master/KMSurvival_for_post.ipynb" target="_blank">another in Python</a>.</em></p>
+  </div>
+
+
+
+  <div id="article_comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_identifier = "2016/11/km-estimation-using-sas-and-python-in-jupyter-notebook.html";
+        (function() {
+             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+             dsq.src = '//gewei.disqus.com/embed.js';
+             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+         })();
+    </script>
+  </div>
+
+</article>
+
+
+  </main>
+
+
+
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- ## for client-side less
+  <link rel="stylesheet/less" type="text/css" href="https://geweiwang.github.io/theme/css/style.less">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/less.js/1.7.3/less.min.js" type="text/javascript"></script>
+  -->
+
+  <link href="https://geweiwang.github.io/favicon.ico?v=2" rel="icon">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/style.min.css">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/pygments.css">
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Inconsolata">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="https://geweiwang.github.io/theme/css/hatena-bookmark-icon.css">
+
+  <script>
+  function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 50 + 'px';
+  }
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Gewei Wang">
+  <meta name="description" content="Posts and writings by Gewei Wang">
+
+  <link href="https://geweiwang.github.io/atom.xml" type="application/atom+xml" rel="alternate" title="Gewei's Blog Atom" />
+
+<meta name="keywords" content="JSON, Python, MongoDB, SQL">
+
+  <title>
+    Gewei's Blog
+&ndash; Large JSON Data Wrangling  </title>
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-71693744-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
+
+<body>
+  <main>
+    <header>
+      <div class="site_name">
+        <a href="https://geweiwang.github.io">Gewei's Blog</a>&emsp;
+        <a href="https://geweiwang.github.io/archives.html">Archive</a>&emsp;
+        <!-- <a href="https://geweiwang.github.io/2015/12/about-me.html">Me</a>&emsp; -->
+        <a href="https://github.com/GeweiWang" target="_blank"><i class="fa fa-github-alt"></i> </a>&emsp;
+        <a href="https://geweiwang.github.io/atom.xml" target="_blank" title="Feed">
+          <i class="fa fa-rss"></i>
+        </a>&ensp;
+      </div>
+
+    </header>
+
+<article>
+  <div class="article_title">
+    <h1><a href="https://geweiwang.github.io/2015/12/large-json-data-wrangling.html">Large JSON Data Wrangling</a></h1>
+  </div>
+  <div class="article_meta">
+    <p class="article_meta_post_date">Wed, 30 Dec 2015</p>
+ Tags:
+      <a href="https://geweiwang.github.io/tag/json.html"> #JSON</a>,      <a href="https://geweiwang.github.io/tag/python.html"> #Python</a>,      <a href="https://geweiwang.github.io/tag/mongodb.html"> #MongoDB</a>,      <a href="https://geweiwang.github.io/tag/sql.html"> #SQL</a>    </p>
+  </div>
+  <div class="article_text">
+    <p><br></p>
+<h3>Introduction</h3>
+<p>In this post, we'll load a large GeoJSON file into MongoDB by ijson (a Python package). Then we'll answer two questions using MongoDB aggregation pipelines; SQL queries are also given for comparisions. We'll wrap up with visualizing querying results on a map.</p>
+<h4>How large is large?</h4>
+<p>A file large for a computer may be nothing for another powerful one. By 'large', we're not talking about big data stored and distributed across clusters of hundreds of servers operating in parallel, but files that can't be handled easily by our laptops or a single server.</p>
+<h4>JSON</h4>
+<p>JSON is a popular lightweight data interchange format for internet of things. Unlike CSV files whose structures can be easily inferred from the header or a few lines, JSON files have flexible schemas which are good for storing and retriving unstructred data, but not easy to be read in chucks. </p>
+<p>A JSON file is probably large for a computer if:</p>
+<ul>
+<li>The cursor of the text editor such as Vim or Emacs gets bogged down in the file.</li>
+<li>The computer becomes slow with frequent not responding when reading the file using Python <code>json.load()</code> or <code>pandas.read_json()</code> because its size is too much for the memory.</li>
+</ul>
+<p><br>
+Now we have a 1.1 GB US Zip3 GeoJSON file, and suppose it's large for our computers. Let's figure out how to wrangle it.</p>
+<p><br></p>
+<h3>Take a look at the data</h3>
+<p>Linux command line comes in handy when we want to get a feel for our data.</p>
+<div class="highlight"><pre><span></span>$ less uszip3.json
+
+<span class="o">{</span>
+  <span class="s2">&quot;type&quot;</span>: <span class="s2">&quot;FeatureCollection&quot;</span>,
+  <span class="s2">&quot;features&quot;</span>: <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">&quot;type&quot;</span>: <span class="s2">&quot;Feature&quot;</span>,
+      <span class="s2">&quot;geometry&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;type&quot;</span>: <span class="s2">&quot;Polygon&quot;</span>,
+        <span class="s2">&quot;coordinates&quot;</span>: <span class="o">[</span>
+          <span class="o">[</span>
+            <span class="o">[</span>
+              -118.30289799964294,
+              <span class="m">34</span>.15840300009842
+            <span class="o">]</span>,
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>$ tail -12 uszip3.json
+
+      <span class="s2">&quot;properties&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;ZIP3&quot;</span>: <span class="s2">&quot;999&quot;</span>,
+        <span class="s2">&quot;POP13_SQMI&quot;</span>: <span class="s2">&quot;7.20000000000e-001&quot;</span>,
+        <span class="s2">&quot;Shape_Area&quot;</span>: <span class="s2">&quot;2.79540779104e+000&quot;</span>,
+        <span class="s2">&quot;Shape_Leng&quot;</span>: <span class="s2">&quot;7.63101677519e+001&quot;</span>,
+        <span class="s2">&quot;POP2013&quot;</span>: <span class="m">5425</span>,
+        <span class="s2">&quot;STATE&quot;</span>: <span class="s2">&quot;AK&quot;</span>,
+        <span class="s2">&quot;SQMI&quot;</span>: <span class="s2">&quot;7.58330000000e+003&quot;</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p><br></p>
+<h3>Profile time and memory usage</h3>
+<p>We're trying to read the JSON file using pandas and ijson. To make comparisons quantitatively, we harness a decorator to measure time and memory consumed by functions.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="n">measure_memory</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">memory_usage</span><span class="p">,</span> <span class="n">proc</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">measure_usage</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A decorator to profile the usage of time and memory by a function&quot;&quot;&quot;</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>        
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Before function &lt;{}&gt;, memory usage: {:.2f} MiB&quot;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">measure_memory</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;After function &lt;{}&gt; done, memory usage: {:.2f} MiB&quot;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">measure_memory</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Function &lt;{}&gt; took {:.2f} s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+</pre></div>
+
+
+<p>Load the file using pandas.</p>
+<div class="highlight"><pre><span></span><span class="n">INFILE</span> <span class="o">=</span> <span class="s1">&#39;uszip3.json&#39;</span>   <span class="c1"># the large GeoJSON file</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="nd">@measure_usage</span>
+<span class="k">def</span> <span class="nf">read_by_pandas</span><span class="p">(</span><span class="n">infile</span><span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;In function &lt;{}&gt;, memory usage: {:0.1f} MiB&quot;</span>
+          <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span> <span class="n">measure_memory</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
+
+<span class="n">read_by_pandas</span><span class="p">(</span><span class="n">INFILE</span><span class="p">)</span> 
+</pre></div>
+
+
+<p>We also load the file using ijson, which will be talked about soon. To make comparisions between the two packages, the measuring results are listed here.</p>
+<div class="highlight"><pre><span></span>                                   | &lt;read_by_pandas&gt; |  &lt;ijson_to_mongodb&gt;
+-----------------------------------|------------------|---------------------
+Before function, memory usage:     |    73.86 MiB     |     40.00 MiB
+In function, memory usage:         |   1916.3 MiB     |     60.61 MiB
+After function done, memory usage: |    71.19 MiB     |     60.62 MiB
+Function took                      |    89.61 s       |     1065.59 s
+</pre></div>
+
+
+<p>From the table, we can see the huge differences between pandas.read_json() and ijson:</p>
+<ul>
+<li>pandas uses about 1.9 GB memory just loading the file to DataFrame. I could barely do anything else on my computer during the reading. If I would try to parse the JSON file, chances are my computer won't respond any more and I have to restart it.</li>
+<li>The function <code>ijson_to_mongodb</code> not only reads the file but parse it and insert data into MongoDB. It took about 18 minutes, but the memory usage was only about 60 MB. At the same time I did other things normally on my computer.</li>
+</ul>
+<p>Python standard library json has the same issue as pandas.read_json(), so we need other packages to handle the large JSON file.</p>
+<p><br><br></p>
+<h3>Read the file in a lazy way</h3>
+<p>Python iterator is an object representing a stream of data. It doesn't read the whole thing into memory, but returns its members one at a time. <a href="https://pypi.python.org/pypi/ijson"><strong>ijson</strong></a> is an iterative JSON parser - a Python package we'll use.</p>
+<p>First let's get the schema of the JSON file using ijson.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ijson</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">INFILE</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">ijson</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;features.item&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ob</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Top level keys:        {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ob</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;&#39;geometry&#39; has keys:   {}</span><span class="se">\n</span><span class="s2">&quot;</span>
+              <span class="s2">&quot;&#39;properties&#39; has keys: {}&quot;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ob</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> 
+                      <span class="nb">list</span><span class="p">(</span><span class="n">ob</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+        <span class="k">break</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>Top level keys:        [&#39;geometry&#39;, &#39;properties&#39;, &#39;type&#39;]
+&#39;geometry&#39; has keys:   [&#39;type&#39;, &#39;coordinates&#39;]
+&#39;properties&#39; has keys: [&#39;Shape_Area&#39;, &#39;SQMI&#39;, &#39;Shape_Leng&#39;, &#39;POP2013&#39;, &#39;ZIP3&#39;, &#39;STATE&#39;, &#39;POP13_SQMI&#39;]
+</pre></div>
+
+
+<p><br><br></p>
+<h3>Load the JSON file into MongoDB</h3>
+<p><em>The reason we load the JSON file into MongoDB</em></p>
+<p>Ijson is good but slow. It's unacceptable to always wait for minutes every time we explore the file. That's the case MongoDB excels in -- the powerful MongoDB engine lets us explore the data fast and easily.</p>
+<p><br>
+MongoDB provides a tool <em>mongoimport</em> which is good for importing line-delimited JSON files, and content export created by another tool <em>mongoexport</em>. However, the tool often gave me a headache when importing JSON files created by other third-party export tools. This US Zip3 GeoJSON was no exception.</p>
+<p>A better way is to use PyMongo, a driver working with MongoDB from Python. Let's look at the code.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">simplejson</span> <span class="kn">as</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pymongo</span>
+
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">False</span>                          <span class="c1"># set DEBUG to False for production</span>
+<span class="n">INDENT_NUM</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">DEBUG</span> <span class="k">else</span> <span class="bp">None</span>      <span class="c1"># for json pretty printing</span>
+
+<span class="n">json_dumps</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">INDENT_NUM</span><span class="p">)</span>
+
+<span class="nd">@measure_usage</span>
+<span class="k">def</span> <span class="nf">ijson_to_mongodb</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">collection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read a JSON file lazily, then insert data into MongoDB&quot;&quot;&quot;</span>    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="n">ijson</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;features.item&#39;</span><span class="p">)</span>
+        <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ob</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">insert_one</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_dumps</span><span class="p">(</span><span class="n">ob</span><span class="p">)))</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;In function &lt;{}&gt;, memory usage: {:0.2f} MiB&quot;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span> <span class="n">measure_memory</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">result</span>    
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">pymongo</span><span class="o">.</span><span class="n">MongoClient</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">)</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datalab</span>           <span class="c1"># the MongoDB database we use</span>
+        <span class="n">collection</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">uszip3</span>        <span class="c1"># collection in the database</span>
+        <span class="n">collection</span><span class="o">.</span><span class="n">find_one</span><span class="p">({})</span>       <span class="c1"># quick test the database</span>
+    <span class="k">except</span> <span class="n">pymongo</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">PyMongoError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;**MongoDB Error**&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ijson_to_mongodb</span><span class="p">(</span><span class="n">INFILE</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>  <span class="c1"># it took about 18 minutes</span>
+</pre></div>
+
+
+<p><br>
+<em>Note</em>:
+I use <code>import simplejson as json</code> instead of Python standard library <em>json</em> because the latter doesn't deal with decimal numbers in latitude and longitude. To avoid TypeError, you have to define a helper function for the <em>default</em> parameter of <code>json.dumps()</code>. Fortunately, <code>simplejson.dumps()</code> serializes decimal numbers to JSON with full precision. See <a href="https://simplejson.readthedocs.io/en/latest/#simplejson.dump">here</a> for details.</p>
+<p><br><br></p>
+<h3>Ask databases</h3>
+<p>Now that we have the JSON data in MongoDB, let's ask two simple questions, and answer them by both MongoDB aggregation pipelines and SQL (PostgreSQL) queries. (I've imported the data except for the geometry information into PostgreSQL.)</p>
+<p><br>
+<strong>Questio 1:</strong> What are the top three states in terms of the number of zip3 codes in each state?</p>
+<p>MongoDB solution:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">rank_state_by_number_of_zip3</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a cursor representing top N state </span>
+<span class="sd">    in terms of the number of zip3 codes&quot;&quot;&quot;</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s1">&#39;$match&#39;</span><span class="p">:</span>   <span class="p">{</span><span class="s1">&#39;properties.POP2013&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$gt&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}},</span>
+        <span class="p">{</span><span class="s1">&#39;$project&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;_id&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}},</span>
+        <span class="p">{</span><span class="s1">&#39;$group&#39;</span><span class="p">:</span>   <span class="p">{</span><span class="s1">&#39;_id&#39;</span><span class="p">:</span>   <span class="s1">&#39;$properties.STATE&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;count&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$sum&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}},</span>
+        <span class="p">{</span><span class="s1">&#39;$sort&#39;</span><span class="p">:</span>    <span class="p">{</span><span class="s1">&#39;count&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}},</span>
+        <span class="p">{</span><span class="s1">&#39;$limit&#39;</span><span class="p">:</span>   <span class="n">N</span><span class="p">}</span>
+    <span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>{&#39;_id&#39;: &#39;CA&#39;, &#39;count&#39;: 57}
+{&#39;_id&#39;: &#39;NY&#39;, &#39;count&#39;: 50}
+{&#39;_id&#39;: &#39;TX&#39;, &#39;count&#39;: 47}
+</pre></div>
+
+
+<p><br>
+SQL solution:</p>
+<div class="highlight"><pre><span></span><span class="c1">-- The top 3 states in terms of the number of zip3 codes in each state</span>
+<span class="k">SELECT</span> <span class="n">state</span><span class="p">,</span> <span class="n">count</span><span class="p">(</span><span class="n">zip3</span><span class="p">)</span> <span class="k">AS</span> <span class="n">cnt_zip3</span>
+<span class="k">FROM</span> <span class="n">uszip3</span>
+<span class="k">WHERE</span> <span class="n">pop2013</span> <span class="o">&gt;</span> <span class="mf">0</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="n">state</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">cnt_zip3</span> <span class="k">DESC</span>
+<span class="k">LIMIT</span> <span class="mf">3</span><span class="p">;</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>state  | cnt_zip3
+-------+----------
+CA     |   57
+NY     |   50
+TX     |   47
+</pre></div>
+
+
+<p><br><br>
+<strong>Questio 2:</strong> What are the top three zip3 codes by population in North Carolina (NC) and Virgina (VA)?</p>
+<p>MongoDB solution:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">rank_zip3_by_pop_each_state</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a cursor representing top N zip3 by population in the state&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s1">&#39;state should be a string&#39;</span>
+
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;$match&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;properties.STATE&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$eq&quot;</span><span class="p">:</span> <span class="n">state</span><span class="p">}}},</span>
+            <span class="p">{</span><span class="s2">&quot;$project&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> 
+                          <span class="s2">&quot;properties.ZIP3&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+                          <span class="s2">&quot;properties.POP2013&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+                          <span class="s2">&quot;properties.STATE&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}},</span>
+            <span class="p">{</span><span class="s2">&quot;$sort&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;properties.POP2013&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}},</span>
+            <span class="p">{</span><span class="s2">&quot;$limit&quot;</span><span class="p">:</span> <span class="n">N</span><span class="p">}</span>            
+    <span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>    
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>    
+    <span class="c1"># ... same code as above    </span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;NC&#39;</span><span class="p">,</span> <span class="s1">&#39;VA&#39;</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">rank_zip3_by_pop_each_state</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>    
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>{&#39;properties&#39;: {&#39;POP2013&#39;: 1111755, &#39;STATE&#39;: &#39;NC&#39;, &#39;ZIP3&#39;: &#39;275&#39;}}
+{&#39;properties&#39;: {&#39;POP2013&#39;: 857761, &#39;STATE&#39;: &#39;NC&#39;, &#39;ZIP3&#39;: &#39;283&#39;}}
+{&#39;properties&#39;: {&#39;POP2013&#39;: 819280, &#39;STATE&#39;: &#39;NC&#39;, &#39;ZIP3&#39;: &#39;282&#39;}}
+{&#39;properties&#39;: {&#39;POP2013&#39;: 886499, &#39;STATE&#39;: &#39;VA&#39;, &#39;ZIP3&#39;: &#39;201&#39;}}
+{&#39;properties&#39;: {&#39;POP2013&#39;: 573094, &#39;STATE&#39;: &#39;VA&#39;, &#39;ZIP3&#39;: &#39;234&#39;}}
+{&#39;properties&#39;: {&#39;POP2013&#39;: 547384, &#39;STATE&#39;: &#39;VA&#39;, &#39;ZIP3&#39;: &#39;232&#39;}}
+</pre></div>
+
+
+<p><br>
+SQL solution:</p>
+<div class="highlight"><pre><span></span><span class="c1">-- The top 3 zip3 by population in North Carolina (NC) and Virgina (VA)</span>
+<span class="k">SELECT</span> <span class="n">state</span><span class="p">,</span> <span class="n">zip3</span><span class="p">,</span> <span class="n">pop2013</span>
+<span class="k">FROM</span> <span class="p">(</span><span class="k">SELECT</span> <span class="n">zip3</span><span class="p">,</span> <span class="n">pop2013</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span>
+             <span class="n">rank</span><span class="p">()</span> <span class="k">OVER</span> <span class="p">(</span><span class="k">PARTITION</span> <span class="k">BY</span> <span class="n">state</span> <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">pop2013</span> <span class="k">DESC</span><span class="p">)</span> <span class="k">AS</span> <span class="n">pos</span>
+      <span class="k">FROM</span> <span class="n">uszip3</span>
+      <span class="k">WHERE</span> <span class="n">state</span> <span class="k">IN</span> <span class="p">(</span><span class="s1">&#39;NC&#39;</span><span class="p">,</span> <span class="s1">&#39;VA&#39;</span><span class="p">)</span> <span class="k">AND</span> <span class="n">pop2013</span> <span class="o">&gt;</span> <span class="mf">0</span>
+      <span class="p">)</span> <span class="n">t</span>
+<span class="k">WHERE</span> <span class="n">pos</span> <span class="o">&lt;=</span> <span class="mf">3</span><span class="p">;</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>state  | zip3  | pop2013
+-------+-------+---------
+NC     | 275   | 1111755
+NC     | 283   | 857761
+NC     | 282   | 819280
+VA     | 201   | 886499
+VA     | 234   | 573094
+VA     | 232   | 547384
+</pre></div>
+
+
+<p><br>
+The output from both databases is same. In PostgreSQL, it's convinent to use the window function <code>RANK()</code> to get the results. In MongoDB I had to iterate over each state. Are there similar window functions in MongoDB?</p>
+<p><br><br></p>
+<h3>Retrieving and visualizing documents</h3>
+<p>With a GeoJSON file, it's natural to look at the data on a map. We extract top 10 zip3 by population in Washington state, and use <a href="http://leafletjs.com/" target="_blank">Leaflet</a> to create a choropleth map.</p>
+<p><a href="/res/choropleth_wa.html" target="_blank">
+<img src="/res/choropleth_snapshot.png" alt="map snapshot">
+</a></p>
+<p><br></p>
+<hr>
+<p><br></p>
+<h3>Summary</h3>
+<p>We have used an iterative JSON parser ijson to load a large GeoJSON file into databases. Then we test them by asking two simple questions, extracting a subset of the data, and visualizing it on a map. Here are further ideas:</p>
+<ul>
+<li>It's possible to reduce the size of an indented JSON file by removing the leading spaces. <code>tr</code> squeeze or <code>sed</code> replace can do it, but you should know what you do to guarantee no information is lost.</li>
+<li>Both relational databases and NoSQL document databases are powerful but for different applications. They are not good at everything. Technology changes fast, so in the near future PostgreSQL might support horizontal scaling well, and MongoDB might support complex transactions and more powerful analytic capabilities.</li>
+</ul>
+<p><br>
+Thanks for reading!</p>
+  </div>
+
+
+
+  <div id="article_comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_identifier = "2015/12/large-json-data-wrangling.html";
+        (function() {
+             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+             dsq.src = '//gewei.disqus.com/embed.js';
+             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+         })();
+    </script>
+  </div>
+
+</article>
+
+
+  </main>
+
+
+
+</body>
+</html>
