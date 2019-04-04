@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Gewei's Blog</title><link href="https://geweiwang.github.io/" rel="alternate"></link><link href="https://geweiwang.github.io/atom.xml" rel="self"></link><id>https://geweiwang.github.io/</id><updated>2017-05-24T00:00:00-04:00</updated><entry><title>Beijing Property Market</title><link href="https://geweiwang.github.io/2017/05/beijing-property-market.html" rel="alternate"></link><published>2017-05-24T00:00:00-04:00</published><updated>2017-05-24T00:00:00-04:00</updated><author><name>Gewei Wang</name></author><id>tag:geweiwang.github.io,2017-05-24:/2017/05/beijing-property-market.html</id><summary type="html">&lt;p&gt;A choropleth map of home prices in Beijing.&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;br&gt;&lt;/p&gt;
 &lt;h3&gt;Introduction&lt;/h3&gt;
-&lt;p&gt;This is a choropleth map of Beijing home prices.&lt;/p&gt;
+&lt;p&gt;This is a choropleth map of Beijing home prices in Python with Bokeh.&lt;/p&gt;
 &lt;p&gt;&lt;br&gt;
 &lt;iframe src="/res/Beijing_property_market_slider.html" height="900" width="100%" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;&lt;/p&gt;
 &lt;p&gt;&lt;br&gt;
